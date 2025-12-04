@@ -9,6 +9,7 @@ import Calendar from "@/components/Calendar";
 import ScheduleItem from "@/components/ScheduleItem";
 import Footer from "@/components/Footer";
 import BottomSheet from "@/components/BottomSheet";
+import SideMenu from "@/components/SideMenu";
 
 const storeOptions = [
   "힘이나는커피생활 을지로3가점",
@@ -18,13 +19,14 @@ const storeOptions = [
 
 export default function Home() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [selectedStore, setSelectedStore] = useState(storeOptions[0]);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-start bg-white md:mx-auto md:my-10 md:min-h-[812px] md:max-w-[375px] md:overflow-hidden md:rounded-[32px] md:shadow-2xl">
       <div className="flex w-full flex-col items-start bg-gradient-to-b from-[#5B5DED] to-[#6F70FA]">
         <StatusBar />
-        <TopBar />
+        <TopBar onMenuClick={() => setIsSideMenuOpen(true)} />
         <div className="flex flex-col items-start gap-[18px] self-stretch px-6 pb-6">
           <SelectForm
             value={selectedStore}
@@ -79,6 +81,11 @@ export default function Home() {
         title="점포선택"
         options={storeOptions}
         onSelect={setSelectedStore}
+      />
+
+      <SideMenu
+        isOpen={isSideMenuOpen}
+        onClose={() => setIsSideMenuOpen(false)}
       />
     </div>
   );
