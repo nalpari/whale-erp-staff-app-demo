@@ -2,8 +2,8 @@ import StatusBar from "@/components/StatusBar";
 import TopBar from "@/components/TopBar";
 import SelectForm from "@/components/SelectForm";
 import UserProfile from "@/components/UserProfile";
-import SalaryList from "@/components/SalaryList";
-import BackButton from "@/components/BackButton";
+import Calendar from "@/components/Calendar";
+import ScheduleItem from "@/components/ScheduleItem";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -19,19 +19,41 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col items-start self-stretch">
+        <Calendar />
+
         <div className="flex flex-col items-center justify-center self-stretch">
-          <div className="flex w-full items-center border-b border-[#DDD] px-6 py-3">
-            <h2 className="flex-1 text-lg font-semibold leading-[150%] tracking-[-0.45px] text-[#1A1A1A]">
-              급여명세서
+          <div className="flex h-[63px] w-full items-center border-b border-[#DDD] px-6">
+            <h2 className="text-lg font-semibold leading-[150%] tracking-[-0.45px] text-[#1A1A1A]">
+              12월 7일 금요일
             </h2>
           </div>
-          <div className="flex flex-col items-center gap-4 self-stretch px-6 py-4">
-            <div className="flex flex-col items-start self-stretch">
-              <SalaryList />
-            </div>
-            <BackButton />
+
+          <div className="flex flex-col items-start gap-2.5 self-stretch">
+            <ScheduleItem 
+              storeName="힘이나는커피생활"
+              timeRange="10:00-18:00"
+              showButtons
+              divisionColor="#6F70FA"
+            />
+
+            <ScheduleItem 
+              storeName="힘이나는커피생활"
+              tag={{ label: "TO-DO", bgColor: "#6F70FA" }}
+              description="머신 청소 확인(홍길동 님과 함께)"
+              descriptionColor="#2379E4"
+              divisionColor="#90C96E"
+            />
+
+            <ScheduleItem 
+              storeName="바나프레소"
+              tag={{ label: "공휴일", bgColor: "#F34A5A" }}
+              description="한글날"
+              descriptionColor="#F34A5A"
+              divisionColor="#E8C368"
+            />
           </div>
         </div>
+
         <Footer />
       </div>
     </div>
