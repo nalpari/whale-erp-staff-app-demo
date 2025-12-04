@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import StatusBar from "@/components/StatusBar";
 import TopBar from "@/components/TopBar";
 import SelectForm from "@/components/SelectForm";
@@ -5,15 +8,28 @@ import UserProfile from "@/components/UserProfile";
 import Calendar from "@/components/Calendar";
 import ScheduleItem from "@/components/ScheduleItem";
 import Footer from "@/components/Footer";
+import BottomSheet from "@/components/BottomSheet";
+
+const storeOptions = [
+  "힘이나는커피생활 을지로3가점",
+  "메가커피 종로점",
+  "바나프레소무교점"
+];
 
 export default function Home() {
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [selectedStore, setSelectedStore] = useState(storeOptions[0]);
+
   return (
-    <div className="flex min-h-screen w-full flex-col items-start bg-white md:mx-auto md:my-10 md:min-h-[812px] md:max-w-[375px] md:overflow-hidden md:rounded-[32px] md:shadow-2xl">
+    <div className="relative flex min-h-screen w-full flex-col items-start bg-white md:mx-auto md:my-10 md:min-h-[812px] md:max-w-[375px] md:overflow-hidden md:rounded-[32px] md:shadow-2xl">
       <div className="flex w-full flex-col items-start bg-gradient-to-b from-[#5B5DED] to-[#6F70FA]">
         <StatusBar />
         <TopBar />
         <div className="flex flex-col items-start gap-[18px] self-stretch px-6 pb-6">
-          <SelectForm />
+          <SelectForm
+            value={selectedStore}
+            onClick={() => setIsBottomSheetOpen(true)}
+          />
           <UserProfile />
         </div>
       </div>
@@ -56,6 +72,14 @@ export default function Home() {
 
         <Footer />
       </div>
+
+      <BottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={() => setIsBottomSheetOpen(false)}
+        title="점포선택"
+        options={storeOptions}
+        onSelect={setSelectedStore}
+      />
     </div>
   );
 }
