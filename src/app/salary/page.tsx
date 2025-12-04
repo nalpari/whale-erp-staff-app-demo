@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import StatusBar from "@/components/StatusBar";
 import TopBar from "@/components/TopBar";
 import SelectForm from "@/components/SelectForm";
@@ -7,13 +10,19 @@ import BackButton from "@/components/BackButton";
 import Footer from "@/components/Footer";
 
 export default function SalaryPage() {
+  const [selectedMonth, setSelectedMonth] = useState("2025년 1월");
+
+  const handleSelectClick = () => {
+    // TODO: 월 선택 BottomSheet 열기
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col items-start bg-white md:mx-auto md:my-10 md:min-h-[812px] md:max-w-[375px] md:overflow-hidden md:rounded-[32px] md:shadow-2xl">
       <div className="flex w-full flex-col items-start bg-gradient-to-b from-[#5B5DED] to-[#6F70FA]">
         <StatusBar />
         <TopBar />
         <div className="flex flex-col items-start gap-[18px] self-stretch px-6 pb-6">
-          <SelectForm />
+          <SelectForm value={selectedMonth} onClick={handleSelectClick} />
           <UserProfile />
         </div>
       </div>
