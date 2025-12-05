@@ -10,6 +10,7 @@ import ScheduleItem from "@/components/ScheduleItem";
 import Footer from "@/components/Footer";
 import BottomSheet from "@/components/BottomSheet";
 import SideMenu from "@/components/SideMenu";
+import QRScanPopup from "@/components/QRScanPopup";
 
 const storeOptions = [
   "힘이나는커피생활 을지로3가점",
@@ -20,6 +21,8 @@ const storeOptions = [
 export default function Home() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const [isQRScanOpen, setIsQRScanOpen] = useState(false);
+  const [qrActiveAction, setQRActiveAction] = useState<"checkIn" | "checkOut">("checkIn");
   const [selectedStore, setSelectedStore] = useState(storeOptions[0]);
 
   return (
@@ -47,11 +50,19 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col items-start gap-2.5 self-stretch">
-            <ScheduleItem 
+            <ScheduleItem
               storeName="힘이나는커피생활"
               timeRange="10:00-18:00"
               showButtons
               divisionColor="#6F70FA"
+              onCheckInClick={() => {
+                setQRActiveAction("checkIn");
+                setIsQRScanOpen(true);
+              }}
+              onCheckOutClick={() => {
+                setQRActiveAction("checkOut");
+                setIsQRScanOpen(true);
+              }}
             />
 
             <ScheduleItem 
@@ -86,6 +97,20 @@ export default function Home() {
       <SideMenu
         isOpen={isSideMenuOpen}
         onClose={() => setIsSideMenuOpen(false)}
+      />
+
+      <QRScanPopup
+        isOpen={isQRScanOpen}
+        activeAction={qrActiveAction}
+        onClose={() => setIsQRScanOpen(false)}
+        onCheckIn={() => {
+          console.log("출근 처리");
+          setIsQRScanOpen(false);
+        }}
+        onCheckOut={() => {
+          console.log("퇴근 처리");
+          setIsQRScanOpen(false);
+        }}
       />
     </div>
   );

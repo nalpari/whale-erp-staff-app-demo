@@ -9,16 +9,20 @@ interface ScheduleItemProps {
   description?: string;
   descriptionColor?: string;
   divisionColor?: string;
+  onCheckInClick?: () => void;
+  onCheckOutClick?: () => void;
 }
 
-export default function ScheduleItem({ 
-  storeName, 
-  timeRange, 
+export default function ScheduleItem({
+  storeName,
+  timeRange,
   showButtons,
   tag,
   description,
   descriptionColor = "#2379E4",
-  divisionColor = "#6F70FA"
+  divisionColor = "#6F70FA",
+  onCheckInClick,
+  onCheckOutClick,
 }: ScheduleItemProps) {
   return (
     <div className="flex items-center gap-1.5 self-stretch border-b border-[#EDEDED] px-6 py-6">
@@ -50,12 +54,18 @@ export default function ScheduleItem({
         )}
       </div>
       {showButtons && (
-        <div className="flex h-[34px] w-[108px] items-center gap-1">
-          <button className="flex items-center justify-center gap-2.5 rounded-full bg-[#6F70FA] px-4 py-1.5">
-            <div className="text-sm font-semibold leading-[150%] tracking-[-0.35px] text-white">출근</div>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={onCheckInClick}
+            className="flex items-center justify-center rounded-full bg-[#6F70FA] px-4 py-1.5"
+          >
+            <span className="text-sm font-semibold leading-[150%] tracking-[-0.35px] text-white">출근</span>
           </button>
-          <button className="flex items-center justify-center gap-2.5 rounded-full border border-[#E8E8E8] px-4 py-1.5">
-            <div className="text-sm font-medium leading-[150%] tracking-[-0.35px] text-[#C0C0C0]">퇴근</div>
+          <button
+            onClick={onCheckOutClick}
+            className="flex items-center justify-center rounded-full border border-[#E8E8E8] px-4 py-1.5"
+          >
+            <span className="text-sm font-medium leading-[150%] tracking-[-0.35px] text-[#C0C0C0]">퇴근</span>
           </button>
         </div>
       )}
