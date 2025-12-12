@@ -1,0 +1,225 @@
+/* Calendar Component Styles */
+/* npm 배포용 독립 CSS */
+
+.whale-calendar {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Navigation */
+.whale-calendar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  align-self: stretch;
+  padding: 1rem 1.5rem;
+}
+
+.whale-calendar__nav-button {
+  display: flex;
+  aspect-ratio: 1;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid #E2E2E2;
+  background-color: #FFFFFF;
+  cursor: pointer;
+}
+
+.whale-calendar__nav-button:hover {
+  background-color: #F5F5F5;
+}
+
+.whale-calendar__title {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 150%;
+  letter-spacing: -0.4px;
+  color: #1A1A1A;
+}
+
+/* Grid */
+.whale-calendar__grid {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+/* Week Header */
+.whale-calendar__week-header {
+  display: flex;
+  height: 34px;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+.whale-calendar__weekday {
+  display: flex;
+  height: 34px;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #EDEDED;
+  border-top: 1px solid #EDEDED;
+}
+
+.whale-calendar__weekday:last-child {
+  border-right: none;
+}
+
+.whale-calendar__weekday-text {
+  align-self: stretch;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.275px;
+  color: #666666;
+}
+
+.whale-calendar__weekday-text--sunday {
+  color: #C93B48;
+}
+
+.whale-calendar__weekday-text--saturday {
+  color: #5A9AEA;
+}
+
+/* Week Row */
+.whale-calendar__week-row {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+/* Day Cell */
+.whale-calendar__day {
+  display: flex;
+  min-height: 54px;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  border-bottom: 1px solid #EDEDED;
+  border-right: 1px solid #EDEDED;
+  padding: 0 4px 4px 4px;
+  background-color: #FFFFFF;
+}
+
+.whale-calendar__day:last-child {
+  border-right: none;
+}
+
+.whale-calendar__day--highlight {
+  background-color: #F2F8D4;
+}
+
+/* Day Number */
+.whale-calendar__day-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.whale-calendar__day-number-wrapper {
+  display: flex;
+  aspect-ratio: 1;
+  height: 18px;
+  width: 18px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+.whale-calendar__day-number-wrapper--today {
+  background-color: #6F70FA;
+}
+
+.whale-calendar__day-number {
+  width: 14px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.275px;
+}
+
+.whale-calendar__day-number--today {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.whale-calendar__day-number--has-schedule {
+  font-weight: 600;
+}
+
+.whale-calendar__day-number--sunday {
+  color: #C93B48;
+}
+
+.whale-calendar__day-number--saturday {
+  color: #5A9AEA;
+}
+
+.whale-calendar__day-number--other-month {
+  color: #CCCCCC;
+}
+
+.whale-calendar__day-number--other-month-sunday {
+  color: #EBC1C5;
+}
+
+.whale-calendar__day-number--other-month-saturday {
+  color: #BDD8FA;
+}
+
+/* Schedule Badge */
+.whale-calendar__schedule-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  border-radius: 3px;
+  background-color: #6F70FA;
+  padding: 2px 4px;
+}
+
+.whale-calendar__schedule-badge-text {
+  text-align: center;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.52px;
+  color: #FFFFFF;
+}
+
+/* Holiday */
+.whale-calendar__holiday {
+  text-align: right;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.25px;
+  color: #C93B48;
+}
+
+/* CSS Variables for theming */
+.whale-calendar {
+  --whale-calendar-primary: #6F70FA;
+  --whale-calendar-sunday: #C93B48;
+  --whale-calendar-saturday: #5A9AEA;
+  --whale-calendar-border: #EDEDED;
+  --whale-calendar-text: #1A1A1A;
+  --whale-calendar-text-muted: #666666;
+  --whale-calendar-highlight-bg: #F2F8D4;
+  --whale-calendar-white: #FFFFFF;
+}
