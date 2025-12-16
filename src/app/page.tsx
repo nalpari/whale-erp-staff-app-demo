@@ -137,7 +137,6 @@ export default function Home() {
   const [contractSchedules, setContractSchedules] = useState<ContractWorkSchedule[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [todayStr, setTodayStr] = useState<string>("");
 
   // 계약 근무 시간을 기반으로 캘린더 데이터 생성
   const scheduleData = useMemo<CalendarData>(() => {
@@ -153,13 +152,6 @@ export default function Home() {
 
     return baseData;
   }, [selectedDate, contractSchedules]);
-
-  // 클라이언트에서만 오늘 날짜 설정 (hydration 에러 방지)
-  useEffect(() => {
-    const today = new Date();
-    const str = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    setTodayStr(str);
-  }, []);
 
   // 직원 데이터 가져오기
   useEffect(() => {
@@ -357,7 +349,9 @@ export default function Home() {
 
   // 출퇴근 버튼 상태 계산 (첫 번째 세션 기준)
   const attendanceButtonState = useMemo(() => {
-    const isToday = todayStr !== "" && selectedDate === todayStr;
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const isToday = selectedDate === todayStr;
     const firstSession = attendance?.attendance_sessions?.[0];
     const isCheckedIn = !!firstSession?.clock_in_time;
     const isCheckedOut = !!firstSession?.clock_out_time;
@@ -370,7 +364,7 @@ export default function Home() {
       isCheckedOut,
       isClickable,
     };
-  }, [selectedDate, attendance, todayStr]);
+  }, [selectedDate, attendance]);
 
   if (isLoading || !currentEmployee) {
     return (
