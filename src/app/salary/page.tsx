@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatusBar from "@/components/StatusBar";
 import TopBar from "@/components/TopBar";
 import SelectForm from "@/components/SelectForm";
@@ -8,22 +8,66 @@ import UserProfile from "@/components/UserProfile";
 import SalaryList from "@/components/SalaryList";
 import BackButton from "@/components/BackButton";
 import Footer from "@/components/Footer";
+import type { EmployeeDisplay } from "@/app/page";
+import { supabase } from "@/lib/supabase";
 
 export default function SalaryPage() {
   const [selectedMonth, setSelectedMonth] = useState("2025년 1월");
+  const [employees, setEmployees] = useState<EmployeeDisplay[]>([]);
+  const [currentEmployee, setCurrentEmployee] = useState<EmployeeDisplay | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEmployees() {
+      const { data, error } = await supabase
+        .from("employees")
+        .select("id, name, position, workplace_name")
+        .in("name", ["임꺽정", "홍길동", "김철수", "이영희", "박민수"]);
+
+      if (error) {
+        console.error("Error fetching employees:", error);
+        return;
+      }
+
+      if (data) {
+        const employeeDisplays: EmployeeDisplay[] = data.map((emp) => ({
+          id: emp.id,
+          name: emp.name,
+          initial: emp.name.charAt(0),
+          position: emp.position || "",
+          role: emp.workplace_name || "직원",
+        }));
+        setEmployees(employeeDisplays);
+        if (employeeDisplays.length > 0) {
+          setCurrentEmployee(employeeDisplays[0]);
+        }
+      }
+      setIsLoading(false);
+    }
+
+    fetchEmployees();
+  }, []);
 
   const handleSelectClick = () => {
     // TODO: 월 선택 BottomSheet 열기
   };
 
+  if (isLoading || !currentEmployee) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-lg text-gray-500">로딩 중...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen w-full flex-col items-start bg-white md:mx-auto md:my-10 md:min-h-[812px] md:max-w-[375px] md:overflow-hidden md:rounded-[32px] md:shadow-2xl">
+    <div className="flex min-h-screen w-full flex-col items-start bg-white">
       <div className="flex w-full flex-col items-start bg-gradient-to-b from-[#5B5DED] to-[#6F70FA]">
         <StatusBar />
         <TopBar />
         <div className="flex flex-col items-start gap-[18px] self-stretch px-6 pb-6">
           <SelectForm value={selectedMonth} onClick={handleSelectClick} />
-          <UserProfile />
+          <UserProfile employee={currentEmployee} />
         </div>
       </div>
 
@@ -41,7 +85,11 @@ export default function SalaryPage() {
             <BackButton />
           </div>
         </div>
-        <Footer />
+        <Footer
+          employees={employees}
+          currentEmployee={currentEmployee}
+          onEmployeeChange={setCurrentEmployee}
+        />
       </div>
     </div>
   );

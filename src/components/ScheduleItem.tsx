@@ -11,6 +11,9 @@ interface ScheduleItemProps {
   divisionColor?: string;
   onCheckInClick?: () => void;
   onCheckOutClick?: () => void;
+  isCheckedIn?: boolean;
+  isCheckedOut?: boolean;
+  isClickable?: boolean;
 }
 
 export default function ScheduleItem({
@@ -23,6 +26,9 @@ export default function ScheduleItem({
   divisionColor = "#6F70FA",
   onCheckInClick,
   onCheckOutClick,
+  isCheckedIn = false,
+  isCheckedOut = false,
+  isClickable = true,
 }: ScheduleItemProps) {
   return (
     <div className="flex items-center gap-1.5 self-stretch border-b border-[#EDEDED] px-6 py-6">
@@ -56,16 +62,34 @@ export default function ScheduleItem({
       {showButtons && (
         <div className="flex shrink-0 items-center gap-1">
           <button
-            onClick={onCheckInClick}
-            className="flex items-center justify-center rounded-full bg-[#6F70FA] px-4 py-1.5"
+            onClick={isClickable && !isCheckedIn ? onCheckInClick : undefined}
+            disabled={!isClickable || isCheckedIn}
+            className={`flex items-center justify-center rounded-full px-4 py-1.5 ${
+              isCheckedIn
+                ? "bg-[#6F70FA]"
+                : "border border-[#E8E8E8]"
+            } ${!isClickable || isCheckedIn ? "cursor-not-allowed" : ""}`}
           >
-            <span className="text-sm font-semibold leading-[150%] tracking-[-0.35px] text-white">출근</span>
+            <span className={`text-sm leading-[150%] tracking-[-0.35px] ${
+              isCheckedIn
+                ? "font-semibold text-white"
+                : "font-medium text-[#C0C0C0]"
+            }`}>출근</span>
           </button>
           <button
-            onClick={onCheckOutClick}
-            className="flex items-center justify-center rounded-full border border-[#E8E8E8] px-4 py-1.5"
+            onClick={isClickable && !isCheckedOut ? onCheckOutClick : undefined}
+            disabled={!isClickable || isCheckedOut}
+            className={`flex items-center justify-center rounded-full px-4 py-1.5 ${
+              isCheckedOut
+                ? "bg-[#6F70FA]"
+                : "border border-[#E8E8E8]"
+            } ${!isClickable || isCheckedOut ? "cursor-not-allowed" : ""}`}
           >
-            <span className="text-sm font-medium leading-[150%] tracking-[-0.35px] text-[#C0C0C0]">퇴근</span>
+            <span className={`text-sm leading-[150%] tracking-[-0.35px] ${
+              isCheckedOut
+                ? "font-semibold text-white"
+                : "font-medium text-[#C0C0C0]"
+            }`}>퇴근</span>
           </button>
         </div>
       )}

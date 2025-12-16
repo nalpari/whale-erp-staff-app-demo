@@ -1,11 +1,20 @@
 "use client";
 
+interface Employee {
+  id: number;
+  name: string;
+  initial: string;
+  position: string;
+  role: string;
+}
+
 interface SideMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  employee: Employee | null;
 }
 
-export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
+export default function SideMenu({ isOpen, onClose, employee }: SideMenuProps) {
   if (!isOpen) return null;
 
   const menuItems = [
@@ -28,14 +37,14 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#8E8FFA]">
-              <span className="text-[17px] font-semibold text-white">임</span>
+              <span className="text-[17px] font-semibold text-white">{employee?.initial || "?"}</span>
             </div>
             <div className="flex flex-1 flex-col">
               <div className="text-[15px] font-normal leading-6 tracking-[-0.15px] text-[#1A1A1A]">
-                <span className="font-semibold">임꺽정</span>님 환영 합니다.
+                <span className="font-semibold">{employee?.name || "사용자"}</span>님 환영 합니다.
               </div>
               <div className="text-xs font-medium leading-3 tracking-[-0.12px] text-[#777]">
-                Interplug corp.
+                {employee?.role || "Interplug corp."}
               </div>
             </div>
           </div>

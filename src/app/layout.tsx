@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "급여명세서 - 힘이 나는 커피생활",
-  description: "직원 급여명세서 조회",
+  title: "힘이 나는 커피생활",
+  description: "프랜차이즈 직원 전용 앱",
 };
 
 export default function RootLayout({

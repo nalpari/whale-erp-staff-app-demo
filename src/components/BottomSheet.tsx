@@ -36,7 +36,7 @@ export default function BottomSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-end md:absolute">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-end">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       <div className="animate-slide-in-bottom relative flex w-full flex-col items-center rounded-t-[32px] bg-white pb-6">
