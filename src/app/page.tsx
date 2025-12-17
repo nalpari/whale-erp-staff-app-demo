@@ -132,7 +132,12 @@ export default function Home() {
 
   const [employees, setEmployees] = useState<EmployeeDisplay[]>([]);
   const [currentEmployee, setCurrentEmployee] = useState<EmployeeDisplay | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>("2025-12-16");
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  });
+  const [currentYear] = useState(() => new Date().getFullYear());
+  const [currentMonth] = useState(() => new Date().getMonth() + 1);
   const [todos, setTodos] = useState<EmployeeTodo[]>([]);
   const [contractSchedules, setContractSchedules] = useState<ContractWorkSchedule[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord | null>(null);
@@ -141,7 +146,7 @@ export default function Home() {
   // 계약 근무 시간을 기반으로 캘린더 데이터 생성
   const scheduleData = useMemo<CalendarData>(() => {
     // 계약 정보를 기반으로 캘린더 데이터 생성
-    const baseData = generateCalendarDataFromContract(contractSchedules, 2025, 12);
+    const baseData = generateCalendarDataFromContract(contractSchedules, currentYear, currentMonth);
 
     // 선택된 날짜에 highlight 추가
     if (baseData[selectedDate]) {
@@ -151,7 +156,7 @@ export default function Home() {
     }
 
     return baseData;
-  }, [selectedDate, contractSchedules]);
+  }, [selectedDate, contractSchedules, currentYear, currentMonth]);
 
   // 직원 데이터 가져오기
   useEffect(() => {
@@ -227,7 +232,11 @@ export default function Home() {
       }
 
       if (data?.contract_work_schedules) {
-        setContractSchedules(data.contract_work_schedules as ContractWorkSchedule[]);
+        // 배열인지 확인하고 처리
+        const schedules = Array.isArray(data.contract_work_schedules)
+          ? data.contract_work_schedules
+          : [data.contract_work_schedules];
+        setContractSchedules(schedules as ContractWorkSchedule[]);
       } else {
         setContractSchedules([]);
       }
@@ -297,7 +306,20 @@ export default function Home() {
         return;
       }
 
-      setAttendance(data);
+      // attendance_sessions가 배열인지 확인하고 처리
+      if (data) {
+        const normalizedData = {
+          ...data,
+          attendance_sessions: Array.isArray(data.attendance_sessions)
+            ? data.attendance_sessions
+            : data.attendance_sessions
+            ? [data.attendance_sessions]
+            : [],
+        };
+        setAttendance(normalizedData as AttendanceRecord);
+      } else {
+        setAttendance(null);
+      }
     }
 
     fetchAttendance();
@@ -352,7 +374,12 @@ export default function Home() {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     const isToday = selectedDate === todayStr;
-    const firstSession = attendance?.attendance_sessions?.[0];
+    
+    // attendance_sessions가 배열인지 확인
+    const sessions = attendance?.attendance_sessions;
+    const sessionsArray = Array.isArray(sessions) ? sessions : sessions ? [sessions] : [];
+    const firstSession = sessionsArray[0];
+    
     const isCheckedIn = !!firstSession?.clock_in_time;
     const isCheckedOut = !!firstSession?.clock_out_time;
 
@@ -365,6 +392,213 @@ export default function Home() {
       isClickable,
     };
   }, [selectedDate, attendance]);
+
+  // 출근 처리 핸들러
+  const handleCheckIn = async () => {
+    if (!currentEmployee) return;
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const currentTime = `${String(today.getHours()).padStart(2, "0")}:${String(today.getMinutes()).padStart(2, "0")}:${String(today.getSeconds()).padStart(2, "0")}`;
+
+    try {
+      // 1. 오늘 날짜의 attendance_record 확인
+      let recordId: number;
+      const { data: existingRecord } = await supabase
+        .from("attendance_records")
+        .select("id")
+        .eq("employee_id", currentEmployee.id)
+        .eq("work_date", todayStr)
+        .eq("is_deleted", false)
+        .single();
+
+      if (existingRecord) {
+        recordId = existingRecord.id;
+      } else {
+        // 2. attendance_record 생성
+        const { data: newRecord, error: recordError } = await supabase
+          .from("attendance_records")
+          .insert({
+            employee_id: currentEmployee.id,
+            work_date: todayStr,
+            attendance_status: "PRESENT",
+            is_absent: false,
+            total_work_minutes: 0,
+            is_deleted: false,
+          })
+          .select("id")
+          .single();
+
+        if (recordError || !newRecord) {
+          console.error("Error creating attendance record:", recordError);
+          alert("출근 기록 생성에 실패했습니다.");
+          return;
+        }
+        recordId = newRecord.id;
+      }
+
+      // 3. attendance_session 생성
+      const { error: sessionError } = await supabase
+        .from("attendance_sessions")
+        .insert({
+          attendance_record_id: recordId,
+          session_number: 1,
+          clock_in_time: currentTime,
+          clock_in_method: "QR",
+          work_minutes: 0,
+        });
+
+      if (sessionError) {
+        console.error("Error creating attendance session:", sessionError);
+        alert("출근 세션 생성에 실패했습니다.");
+        return;
+      }
+
+      // 4. 출퇴근 데이터 새로고침
+      const { data: updatedData } = await supabase
+        .from("attendance_records")
+        .select(`
+          *,
+          attendance_sessions (
+            id, attendance_record_id, session_number,
+            clock_in_time, clock_out_time, work_minutes,
+            clock_in_method, clock_out_method
+          )
+        `)
+        .eq("employee_id", currentEmployee.id)
+        .eq("work_date", todayStr)
+        .eq("is_deleted", false)
+        .single();
+
+      if (updatedData) {
+        // attendance_sessions가 배열인지 확인하고 처리
+        const normalizedData = {
+          ...updatedData,
+          attendance_sessions: Array.isArray(updatedData.attendance_sessions)
+            ? updatedData.attendance_sessions
+            : updatedData.attendance_sessions
+            ? [updatedData.attendance_sessions]
+            : [],
+        };
+        setAttendance(normalizedData as AttendanceRecord);
+      }
+
+      setIsQRScanOpen(false);
+      alert("출근 처리되었습니다.");
+    } catch (error) {
+      console.error("Check-in error:", error);
+      alert("출근 처리 중 오류가 발생했습니다.");
+    }
+  };
+
+  // TODO 상태 토글 핸들러
+  const handleToggleTodo = async (todoId: number, currentStatus: string) => {
+    const newStatus = currentStatus === "COMPLETED" ? "PENDING" : "COMPLETED";
+
+    const { error } = await supabase
+      .from("employee_todos")
+      .update({ status: newStatus })
+      .eq("id", todoId);
+
+    if (error) {
+      console.error("Error updating todo:", error);
+      alert("TODO 상태 변경에 실패했습니다.");
+      return;
+    }
+
+    // 로컬 상태 업데이트
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === todoId ? { ...todo, status: newStatus } : todo
+      )
+    );
+  };
+
+  // 퇴근 처리 핸들러
+  const handleCheckOut = async () => {
+    if (!currentEmployee || !attendance) return;
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const currentTime = `${String(today.getHours()).padStart(2, "0")}:${String(today.getMinutes()).padStart(2, "0")}:${String(today.getSeconds()).padStart(2, "0")}`;
+
+    try {
+      // 1. 퇴근하지 않은 세션 찾기
+      const sessions = attendance.attendance_sessions;
+      const sessionsArray = Array.isArray(sessions) ? sessions : sessions ? [sessions] : [];
+      const session = sessionsArray.find(s => !s.clock_out_time);
+      if (!session) {
+        alert("출근 기록이 없거나 이미 퇴근 처리되었습니다.");
+        return;
+      }
+
+      // 2. 근무 시간 계산 (분 단위)
+      const clockInParts = session.clock_in_time!.split(":");
+      const clockInMinutes = parseInt(clockInParts[0]) * 60 + parseInt(clockInParts[1]);
+      const currentParts = currentTime.split(":");
+      const currentMinutes = parseInt(currentParts[0]) * 60 + parseInt(currentParts[1]);
+      const workMinutes = currentMinutes - clockInMinutes;
+
+      // 3. attendance_session 업데이트
+      const { error: sessionError } = await supabase
+        .from("attendance_sessions")
+        .update({
+          clock_out_time: currentTime,
+          clock_out_method: "QR",
+          work_minutes: workMinutes > 0 ? workMinutes : 0,
+        })
+        .eq("id", session.id);
+
+      if (sessionError) {
+        console.error("Error updating attendance session:", sessionError);
+        alert("퇴근 처리에 실패했습니다.");
+        return;
+      }
+
+      // 4. attendance_record의 total_work_minutes 업데이트
+      await supabase
+        .from("attendance_records")
+        .update({
+          total_work_minutes: workMinutes > 0 ? workMinutes : 0,
+        })
+        .eq("id", attendance.id);
+
+      // 5. 출퇴근 데이터 새로고침
+      const { data: updatedData } = await supabase
+        .from("attendance_records")
+        .select(`
+          *,
+          attendance_sessions (
+            id, attendance_record_id, session_number,
+            clock_in_time, clock_out_time, work_minutes,
+            clock_in_method, clock_out_method
+          )
+        `)
+        .eq("employee_id", currentEmployee.id)
+        .eq("work_date", todayStr)
+        .eq("is_deleted", false)
+        .single();
+
+      if (updatedData) {
+        // attendance_sessions가 배열인지 확인하고 처리
+        const normalizedData = {
+          ...updatedData,
+          attendance_sessions: Array.isArray(updatedData.attendance_sessions)
+            ? updatedData.attendance_sessions
+            : updatedData.attendance_sessions
+            ? [updatedData.attendance_sessions]
+            : [],
+        };
+        setAttendance(normalizedData as AttendanceRecord);
+      }
+
+      setIsQRScanOpen(false);
+      alert("퇴근 처리되었습니다.");
+    } catch (error) {
+      console.error("Check-out error:", error);
+      alert("퇴근 처리 중 오류가 발생했습니다.");
+    }
+  };
 
   if (isLoading || !currentEmployee) {
     return (
@@ -390,8 +624,8 @@ export default function Home() {
 
       <div className="flex flex-col items-start self-stretch">
         <WhaleCalendar
-          year={2025}
-          month={12}
+          year={currentYear}
+          month={currentMonth}
           data={scheduleData}
           onDayClick={handleDayClick}
         />
@@ -436,6 +670,7 @@ export default function Home() {
                   description={`${todo.title}${todo.due_time ? ` (${todo.due_time.slice(0, 5)})` : ""}`}
                   descriptionColor={todo.status === "COMPLETED" ? "#90C96E" : "#2379E4"}
                   divisionColor={getPriorityColor(todo.priority)}
+                  onDescriptionClick={() => handleToggleTodo(todo.id, todo.status)}
                 />
               ))
             ) : (
@@ -471,14 +706,8 @@ export default function Home() {
         isOpen={isQRScanOpen}
         activeAction={qrActiveAction}
         onClose={() => setIsQRScanOpen(false)}
-        onCheckIn={() => {
-          console.log("출근 처리");
-          setIsQRScanOpen(false);
-        }}
-        onCheckOut={() => {
-          console.log("퇴근 처리");
-          setIsQRScanOpen(false);
-        }}
+        onCheckIn={handleCheckIn}
+        onCheckOut={handleCheckOut}
       />
     </div>
   );

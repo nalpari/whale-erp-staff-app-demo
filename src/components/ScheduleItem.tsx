@@ -14,6 +14,7 @@ interface ScheduleItemProps {
   isCheckedIn?: boolean;
   isCheckedOut?: boolean;
   isClickable?: boolean;
+  onDescriptionClick?: () => void;
 }
 
 export default function ScheduleItem({
@@ -29,6 +30,7 @@ export default function ScheduleItem({
   isCheckedIn = false,
   isCheckedOut = false,
   isClickable = true,
+  onDescriptionClick,
 }: ScheduleItemProps) {
   return (
     <div className="flex items-center gap-1.5 self-stretch border-b border-[#EDEDED] px-6 py-6">
@@ -53,9 +55,15 @@ export default function ScheduleItem({
                 {tag.label}
               </div>
             </div>
-            <div className="text-sm font-normal leading-[150%] tracking-[-0.35px]" style={{ color: descriptionColor }}>
+            <button
+              type="button"
+              onClick={onDescriptionClick}
+              className={`text-sm font-normal leading-[150%] tracking-[-0.35px] text-left ${onDescriptionClick ? "cursor-pointer hover:underline" : ""}`}
+              style={{ color: descriptionColor }}
+              disabled={!onDescriptionClick}
+            >
               {description}
-            </div>
+            </button>
           </div>
         )}
       </div>
