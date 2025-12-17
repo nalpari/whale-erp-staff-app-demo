@@ -15,8 +15,6 @@ interface SideMenuProps {
 }
 
 export default function SideMenu({ isOpen, onClose, employee }: SideMenuProps) {
-  if (!isOpen) return null;
-
   const menuItems = [
     { label: "회원 정보 수정", href: "#" },
     { label: "비밀번호 변경", href: "#" },
@@ -25,6 +23,8 @@ export default function SideMenu({ isOpen, onClose, employee }: SideMenuProps) {
     { label: "급여명세서", href: "/salary" },
     { label: "TO-DO LIST", href: "#" },
   ];
+
+  if (!isOpen) return null;
 
   return (
     <>

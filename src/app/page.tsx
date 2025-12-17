@@ -600,27 +600,25 @@ export default function Home() {
     }
   };
 
-  if (isLoading || !currentEmployee) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg text-gray-500">로딩 중...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative flex min-h-screen w-full flex-col items-start bg-white">
-      <div className="flex w-full flex-col items-start bg-gradient-to-b from-[#5B5DED] to-[#6F70FA]">
-        <StatusBar />
-        <TopBar onMenuClick={() => setIsSideMenuOpen(true)} />
-        <div className="flex flex-col items-start gap-[18px] self-stretch px-6 pb-6">
-          <SelectForm
-            value={selectedStore}
-            onClick={() => setIsBottomSheetOpen(true)}
-          />
-          <UserProfile employee={currentEmployee} />
+      {isLoading || !currentEmployee ? (
+        <div className="flex min-h-screen w-full items-center justify-center">
+          <div className="text-lg text-gray-500">로딩 중...</div>
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="flex w-full flex-col items-start bg-gradient-to-b from-[#5B5DED] to-[#6F70FA]">
+            <StatusBar />
+            <TopBar onMenuClick={() => setIsSideMenuOpen(true)} />
+            <div className="flex flex-col items-start gap-[18px] self-stretch px-6 pb-6">
+              <SelectForm
+                value={selectedStore}
+                onClick={() => setIsBottomSheetOpen(true)}
+              />
+              <UserProfile employee={currentEmployee} />
+            </div>
+          </div>
 
       <div className="flex flex-col items-start self-stretch">
         <WhaleCalendar
@@ -688,27 +686,35 @@ export default function Home() {
         />
       </div>
 
-      <BottomSheet
-        isOpen={isBottomSheetOpen}
-        onClose={() => setIsBottomSheetOpen(false)}
-        title="점포선택"
-        options={storeOptions}
-        onSelect={setSelectedStore}
-      />
+      {isBottomSheetOpen && (
+        <BottomSheet
+          isOpen={isBottomSheetOpen}
+          onClose={() => setIsBottomSheetOpen(false)}
+          title="점포선택"
+          options={storeOptions}
+          onSelect={setSelectedStore}
+        />
+      )}
 
-      <SideMenu
-        isOpen={isSideMenuOpen}
-        onClose={() => setIsSideMenuOpen(false)}
-        employee={currentEmployee}
-      />
+      {isSideMenuOpen && (
+        <SideMenu
+          isOpen={isSideMenuOpen}
+          onClose={() => setIsSideMenuOpen(false)}
+          employee={currentEmployee}
+        />
+      )}
 
-      <QRScanPopup
-        isOpen={isQRScanOpen}
-        activeAction={qrActiveAction}
-        onClose={() => setIsQRScanOpen(false)}
-        onCheckIn={handleCheckIn}
-        onCheckOut={handleCheckOut}
-      />
+      {isQRScanOpen && (
+        <QRScanPopup
+          isOpen={isQRScanOpen}
+          activeAction={qrActiveAction}
+          onClose={() => setIsQRScanOpen(false)}
+          onCheckIn={handleCheckIn}
+          onCheckOut={handleCheckOut}
+        />
+      )}
+        </>
+      )}
     </div>
   );
 }

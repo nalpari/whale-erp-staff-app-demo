@@ -19,21 +19,22 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   useEffect(() => {
     if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      return () => {
+        if (document.body) {
+          document.body.style.overflow = originalOverflow || "unset";
+        }
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
-
-  if (!isOpen) return null;
 
   const handleOptionClick = (option: string) => {
     onSelect?.(option);
     onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-end">
